@@ -15,21 +15,27 @@ class Trainer:
         model = random_forest_model.fit(X, y)
         return model
     
-    def random_forest_predict(self, model, X, y):
+    def random_forest_predict(self, model, X):
         y_predict = model.predict(X)
         return y_predict
         
     def train(self):
         my_loader = Loader()
         train, valid, test = my_loader.load_data('data/train.csv', 'data/test.csv')
-        input_cols = ['season', 'holiday', 'workingday', 'weather', 'temp', 'atemp', 'windspeed', 'hour']
-        X_train, y_train = my_loader.create_data(train, input_cols)
-        X_valid, y_valid = my_loader.create_data(valid, input_cols)
+        input_cols = ['season', 'holiday', 'workingday', 'weather', 'temp', 'atemp', 'windspeed', 'hour', 'month', 'year']
+        X_train, y_train, y_train_registered, y_train_casual = my_loader.create_data(train, input_cols)
+        X_valid, y_valid, y_valid_registered, y_valid_casual = my_loader.create_data(valid, input_cols)
         
-        model = self.random_forest_train(X_train, y_train)
-        y_predict = self.random_forest_predict(model, X_valid, y_valid)
-        rmsle = self.get_rmsle(y_predict, y_valid)
+        model_registered = self.random_forest_train(X_train, y_train_registered)
+        y_predict_registered = self.random_forest_predict(model_registered, X_valid)
+        
+        model_casual = self.random_forest_train(X_train, y_train_casual)
+        y_predict_casual = self.random_forest_predict(model_casual, X_valid)
+        
+        y_predict_count = np.round(y_predict_registered + y_predict_casual)
+        rmsle = self.get_rmsle(y_predict_count, y_valid)
         print(rmsle)
+        
     
 if __name__ == "__main__":
     my_trainer = Trainer()

@@ -33,7 +33,9 @@ class Loader:
     def create_data(self, data, input_cols):
         X = data[input_cols].as_matrix()
         y = data['count'].as_matrix()
-        return X, y
+        y_registered = data['registered'].as_matrix()
+        y_casual = data['casual'].as_matrix()
+        return X, y, y_registered, y_casual
         
     
 if __name__ == "__main__":
