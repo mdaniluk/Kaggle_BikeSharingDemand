@@ -30,15 +30,21 @@ class Trainer:
        
     def linear_regression_train(self, X, y):
         lin_reg_model = linear_model.LinearRegression()
-        return lin_reg_model.fit(X,y)
+        lin_reg_model.fit(X,y)
+        return lin_reg_model
     
+    def svm_train(self, X, y):
+        clf = svm.SVR()
+        clf.fit(X,y)
+        return clf
+        
     def adaboost_train(self, X, y):
         adaboost_model = AdaBoostRegressor(n_estimators=100)
         adaboost_model.fit(X,y)
         return adaboost_model
         
     def gradient_boosting_train(self, X, y):
-        params = {'n_estimators': 100, 'max_depth': 5, 'random_state': 0, 'min_samples_leaf' : 10, 'learning_rate': 0.1, 'subsample': 0.7, 'loss': 'ls'}
+        params = {'max_depth': 5, 'random_state': 0, 'min_samples_leaf' : 10, 'subsample': 0.7}
         gb_model = GradientBoostingRegressor(**params)
         gb_model.fit(X,y)
         return gb_model
@@ -53,17 +59,16 @@ class Trainer:
         y_predict = model.predict(X)
         return y_predict
         
-     
     def train(self):
         my_loader = Loader()
         train, valid, _ = my_loader.load_data('data/train.csv', 'data/test.csv')
         X_train, y_train, y_train_registered, y_train_casual = my_loader.create_data(train, self.input_cols)
         X_valid, y_valid, y_valid_registered, y_valid_casual = my_loader.create_data(valid, self.input_cols)
                
-        model_registered = self.gradient_boosting_train(X_train, y_train_registered)
+        model_registered = self.svm_train(X_train, y_train_registered)
         y_predict_registered = np.exp(self.model_predict(model_registered, X_valid)) - 1
         
-        model_casual = self.gradient_boosting_train(X_train, y_train_casual)
+        model_casual = self.svm_train(X_train, y_train_casual)
         y_predict_casual = np.exp(self.model_predict(model_casual, X_valid)) - 1
         
         y_predict_count = np.round(y_predict_registered + y_predict_casual)
