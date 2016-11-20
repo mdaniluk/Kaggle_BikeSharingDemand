@@ -13,21 +13,25 @@ class Trainer:
     def set_input_cols(self):
         self.input_cols = ['season', 'holiday', 'workingday', 'weather', 'temp', 'atemp', 'humidity', 'windspeed', 'hour', 'year', 'dayofweek']
         
-    def grid_search(self, X, y):
-        model = RandomForestRegressor(random_state=30)
-        param_grid = { 'n_estimators': [800, 1000, 1200], 'max_depth': [10, 15], 'min_samples_split': [2,5] }
+    def find_optimal_parameters(self, X, y, model, param_grid):
         CV_rfc = GridSearchCV(estimator=model, param_grid=param_grid, cv= 5)
         CV_rfc.fit(X, y)
         print (CV_rfc.best_params_)
     
-    def gird_search_random_forest(self):
+    def load_gird_search(self, model, param_grid):
         my_loader = Loader()
         train, valid, test = my_loader.load_data('data/train.csv', 'data/test.csv')
         X_train, y_train, y_train_registered, y_train_casual = my_loader.create_data(train, self.input_cols)
-        X_valid, y_valid, y_valid_registered, y_valid_casual = my_loader.create_data(valid, self.input_cols)
-        self.grid_search(X_train, y_train_registered)
-        self.grid_search(X_train, y_train_casual)
-       
+        self.find_optimal_parameters(X_train, y_train_registered, model, param_grid)
+        self.find_optimal_parameters(X_train, y_train_casual, model, param_grid)
+    
+    def grid_search(self):
+#        model = RandomForestRegressor(random_state=30)
+#        param_grid = { 'n_estimators': [800, 1000, 1200], 'max_depth': [10, 15], 'min_samples_split': [2,5] }
+        model = GradientBoostingRegressor()
+        param_grid = { 'n_estimators': [100, 500, 100], 'max_depth': [3, 5, 8], 'min_samples_leaf': [1,5, 10], 'subsample': [0.7, 1] }
+        self.load_gird_search(model, param_grid)
+        
     def linear_regression_train(self, X, y):
         lin_reg_model = linear_model.LinearRegression()
         lin_reg_model.fit(X,y)
@@ -44,13 +48,13 @@ class Trainer:
         return adaboost_model
         
     def gradient_boosting_train(self, X, y):
-        params = {'max_depth': 5, 'random_state': 0, 'min_samples_leaf' : 10, 'subsample': 0.7}
+        params = {'n_estimators': 500, 'max_depth': 3, 'min_samples_leaf' : 5, 'subsample': 0.7}
         gb_model = GradientBoostingRegressor(**params)
         gb_model.fit(X,y)
         return gb_model
         
     def random_forest_train(self, X, y):
-        params = {'n_estimators': 1000, 'max_depth': 15, 'random_state': 0, 'min_samples_split' : 5, 'n_jobs': -1}
+        params = {'n_estimators': 1000, 'max_depth': 15, 'min_samples_split' : 5, 'n_jobs': -1}
         random_forest_model = RandomForestRegressor(**params)
         model = random_forest_model.fit(X, y)
         return model
@@ -65,10 +69,10 @@ class Trainer:
         X_train, y_train, y_train_registered, y_train_casual = my_loader.create_data(train, self.input_cols)
         X_valid, y_valid, y_valid_registered, y_valid_casual = my_loader.create_data(valid, self.input_cols)
                
-        model_registered = self.svm_train(X_train, y_train_registered)
+        model_registered = self.gradient_boosting_train(X_train, y_train_registered)
         y_predict_registered = np.exp(self.model_predict(model_registered, X_valid)) - 1
         
-        model_casual = self.svm_train(X_train, y_train_casual)
+        model_casual = self.gradient_boosting_train(X_train, y_train_casual)
         y_predict_casual = np.exp(self.model_predict(model_casual, X_valid)) - 1
         
         y_predict_count = np.round(y_predict_registered + y_predict_casual)
@@ -98,3 +102,4 @@ if __name__ == "__main__":
     my_trainer = Trainer()
     my_trainer.set_input_cols()
     my_trainer.train()
+#    my_trainer.grid_search()
