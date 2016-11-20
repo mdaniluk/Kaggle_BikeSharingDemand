@@ -1,5 +1,5 @@
 from loader import Loader
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.grid_search import GridSearchCV
 import numpy as np
 
@@ -26,6 +26,11 @@ class Trainer:
         X_valid, y_valid, y_valid_registered, y_valid_casual = my_loader.create_data(valid, self.input_cols)
         self.grid_search(X_train, y_train_registered)
         self.grid_search(X_train, y_train_casual)
+       
+    def gradient_boosting_train(self, X, y):
+        params = {'n_estimators': 100, 'max_depth': 5, 'random_state': 0, 'min_samples_leaf' : 10, 'learning_rate': 0.1, 'subsample': 0.7, 'loss': 'ls'}
+        gb_model = GradientBoostingRegressor(**params)
+        return gb_model.fit(X,y)
         
     def random_forest_train(self, X, y):
         params = {'n_estimators': 1000, 'max_depth': 15, 'random_state': 0, 'min_samples_split' : 5, 'n_jobs': -1}
@@ -44,10 +49,10 @@ class Trainer:
         X_train, y_train, y_train_registered, y_train_casual = my_loader.create_data(train, self.input_cols)
         X_valid, y_valid, y_valid_registered, y_valid_casual = my_loader.create_data(valid, self.input_cols)
                
-        model_registered = self.random_forest_train(X_train, y_train_registered)
+        model_registered = self.gradient_boosting_train(X_train, y_train_registered)
         y_predict_registered = np.exp(self.model_predict(model_registered, X_valid)) - 1
         
-        model_casual = self.random_forest_train(X_train, y_train_casual)
+        model_casual = self.gradient_boosting_train(X_train, y_train_casual)
         y_predict_casual = np.exp(self.model_predict(model_casual, X_valid)) - 1
         
         y_predict_count = np.round(y_predict_registered + y_predict_casual)
