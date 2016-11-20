@@ -15,6 +15,12 @@ class Loader:
         data['dayofweek'] = date_time.dayofweek
         return data
         
+    def logarithmic_transformation(self, data):
+        data['casual'] = np.log(data['casual'] + 1)
+        data['registered'] = np.log(data['registered'] + 1)
+        data['count'] = np.log(data['count'] + 1)
+        return data
+        
     def read_data(self, path):
         data = pd.read_csv(path)
         data = self.parse_data_time(data)
@@ -27,6 +33,7 @@ class Loader:
         
     def load_data(self, path_train, path_test):
         data_train_valid = self.read_data(path_train)
+        data_train_valid = self.logarithmic_transformation(data_train_valid)
         data_test = self.read_data(path_test)
         data_train, data_valid = self.train_valid_split(data_train_valid, split_day = 15)
         return data_train, data_valid, data_test

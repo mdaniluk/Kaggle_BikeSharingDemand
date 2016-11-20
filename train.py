@@ -33,7 +33,7 @@ class Trainer:
         model = random_forest_model.fit(X, y)
         return model
     
-    def random_forest_predict(self, model, X):
+    def model_predict(self, model, X):
         y_predict = model.predict(X)
         return y_predict
         
@@ -45,13 +45,14 @@ class Trainer:
         X_valid, y_valid, y_valid_registered, y_valid_casual = my_loader.create_data(valid, self.input_cols)
                
         model_registered = self.random_forest_train(X_train, y_train_registered)
-        y_predict_registered = self.random_forest_predict(model_registered, X_valid)
+        y_predict_registered = np.exp(self.model_predict(model_registered, X_valid)) - 1
         
         model_casual = self.random_forest_train(X_train, y_train_casual)
-        y_predict_casual = self.random_forest_predict(model_casual, X_valid)
+        y_predict_casual = np.exp(self.model_predict(model_casual, X_valid)) - 1
         
         y_predict_count = np.round(y_predict_registered + y_predict_casual)
-        rmsle = self.get_rmsle(y_predict_count, y_valid)
+        
+        rmsle = self.get_rmsle(y_predict_count, np.exp(y_valid_registered) + np.exp(y_valid_casual) - 2)
         print(rmsle)
         self.predict('data/test.csv', model_registered, model_casual)
         
@@ -59,8 +60,8 @@ class Trainer:
         my_loader = Loader()
         test_data = my_loader.read_data(path)
         X = test_data[self.input_cols].as_matrix()
-        y_registered = model_registerd.predict(X)
-        y_casual = model_casual.predict(X)
+        y_registered = np.exp(model_registerd.predict(X)) - 1
+        y_casual = np.exp(model_casual.predict(X)) - 1
         y_predict_count = np.round(y_registered + y_casual)
         
         test_data['count'] = y_predict_count
