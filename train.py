@@ -1,5 +1,6 @@
 from loader import Loader
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, AdaBoostRegressor
+from sklearn import linear_model, svm
 from sklearn.grid_search import GridSearchCV
 import numpy as np
 
@@ -27,10 +28,20 @@ class Trainer:
         self.grid_search(X_train, y_train_registered)
         self.grid_search(X_train, y_train_casual)
        
+    def linear_regression_train(self, X, y):
+        lin_reg_model = linear_model.LinearRegression()
+        return lin_reg_model.fit(X,y)
+    
+    def adaboost_train(self, X, y):
+        adaboost_model = AdaBoostRegressor(n_estimators=100)
+        adaboost_model.fit(X,y)
+        return adaboost_model
+        
     def gradient_boosting_train(self, X, y):
         params = {'n_estimators': 100, 'max_depth': 5, 'random_state': 0, 'min_samples_leaf' : 10, 'learning_rate': 0.1, 'subsample': 0.7, 'loss': 'ls'}
         gb_model = GradientBoostingRegressor(**params)
-        return gb_model.fit(X,y)
+        gb_model.fit(X,y)
+        return gb_model
         
     def random_forest_train(self, X, y):
         params = {'n_estimators': 1000, 'max_depth': 15, 'random_state': 0, 'min_samples_split' : 5, 'n_jobs': -1}
