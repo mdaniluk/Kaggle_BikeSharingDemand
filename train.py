@@ -38,7 +38,7 @@ class Trainer:
      
     def train(self):
         my_loader = Loader()
-        train, valid, test = my_loader.load_data('data/train.csv', 'data/test.csv')
+        train, valid, _ = my_loader.load_data('data/train.csv', 'data/test.csv')
         input_cols = ['season', 'holiday', 'workingday', 'weather', 'temp', 'atemp', 'windspeed', 'hour', 'month', 'year']
         X_train, y_train, y_train_registered, y_train_casual = my_loader.create_data(train, input_cols)
         X_valid, y_valid, y_valid_registered, y_valid_casual = my_loader.create_data(valid, input_cols)
@@ -52,6 +52,24 @@ class Trainer:
         y_predict_count = np.round(y_predict_registered + y_predict_casual)
         rmsle = self.get_rmsle(y_predict_count, y_valid)
         print(rmsle)
+        self.predict('data/test.csv', model_registered, model_casual)
+        
+    def predict(self, path, model_registerd, model_casual):
+        my_loader = Loader()
+        test_data = my_loader.read_data(path)
+        input_cols = ['season', 'holiday', 'workingday', 'weather', 'temp', 'atemp', 'windspeed', 'hour', 'month', 'year']
+        X = test_data[input_cols].as_matrix()
+        y_registered = model_registerd.predict(X)
+        y_casual = model_casual.predict(X)
+        y_predict_count = np.round(y_registered + y_casual)
+        
+        test_data['count'] = y_predict_count
+        output = test_data[['datetime', 'count']].copy()
+        output.to_csv('submit.csv', index = False)
+        print ('A')
+        
+        
+        
         
     
 if __name__ == "__main__":
