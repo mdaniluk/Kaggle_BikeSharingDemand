@@ -8,7 +8,10 @@ class Trainer:
         diff = np.log(y_pred + 1) - np.log(y_actual + 1)
         mean_error = np.square(diff).mean()
         return np.sqrt(mean_error)
-    
+        
+    def set_input_cols(self):
+        self.input_cols = ['season', 'holiday', 'workingday', 'weather', 'temp', 'atemp', 'humidity', 'windspeed', 'hour', 'year', 'dayofweek']
+        
     def grid_search(self, X, y):
         model = RandomForestRegressor(random_state=30)
         param_grid = { 'n_estimators': [800, 1000, 1200], 'max_depth': [10, 15], 'min_samples_split': [2,5] }
@@ -19,9 +22,8 @@ class Trainer:
     def gird_search_random_forest(self):
         my_loader = Loader()
         train, valid, test = my_loader.load_data('data/train.csv', 'data/test.csv')
-        input_cols = ['season', 'holiday', 'workingday', 'weather', 'temp', 'atemp', 'windspeed', 'hour', 'month', 'year']
-        X_train, y_train, y_train_registered, y_train_casual = my_loader.create_data(train, input_cols)
-        X_valid, y_valid, y_valid_registered, y_valid_casual = my_loader.create_data(valid, input_cols)
+        X_train, y_train, y_train_registered, y_train_casual = my_loader.create_data(train, self.input_cols)
+        X_valid, y_valid, y_valid_registered, y_valid_casual = my_loader.create_data(valid, self.input_cols)
         self.grid_search(X_train, y_train_registered)
         self.grid_search(X_train, y_train_casual)
         
@@ -39,9 +41,8 @@ class Trainer:
     def train(self):
         my_loader = Loader()
         train, valid, _ = my_loader.load_data('data/train.csv', 'data/test.csv')
-        input_cols = ['season', 'holiday', 'workingday', 'weather', 'temp', 'atemp', 'windspeed', 'hour', 'month', 'year']
-        X_train, y_train, y_train_registered, y_train_casual = my_loader.create_data(train, input_cols)
-        X_valid, y_valid, y_valid_registered, y_valid_casual = my_loader.create_data(valid, input_cols)
+        X_train, y_train, y_train_registered, y_train_casual = my_loader.create_data(train, self.input_cols)
+        X_valid, y_valid, y_valid_registered, y_valid_casual = my_loader.create_data(valid, self.input_cols)
                
         model_registered = self.random_forest_train(X_train, y_train_registered)
         y_predict_registered = self.random_forest_predict(model_registered, X_valid)
@@ -57,8 +58,7 @@ class Trainer:
     def predict(self, path, model_registerd, model_casual):
         my_loader = Loader()
         test_data = my_loader.read_data(path)
-        input_cols = ['season', 'holiday', 'workingday', 'weather', 'temp', 'atemp', 'windspeed', 'hour', 'month', 'year']
-        X = test_data[input_cols].as_matrix()
+        X = test_data[self.input_cols].as_matrix()
         y_registered = model_registerd.predict(X)
         y_casual = model_casual.predict(X)
         y_predict_count = np.round(y_registered + y_casual)
@@ -74,4 +74,5 @@ class Trainer:
     
 if __name__ == "__main__":
     my_trainer = Trainer()
+    my_trainer.set_input_cols()
     my_trainer.train()

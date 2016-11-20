@@ -12,6 +12,7 @@ class Loader:
         data['month'] = date_time.month
         data['year'] = date_time.year
         data['hour'] = date_time.hour
+        data['dayofweek'] = date_time.dayofweek
         return data
         
     def read_data(self, path):
