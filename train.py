@@ -90,8 +90,7 @@ class Trainer:
         y_predict_count = np.round(y_registered + y_casual)
         
         test_data['count'] = y_predict_count
-        output = test_data[['datetime', 'count']].copy()
-        output.to_csv('submit.csv', index = False)
+        test_data[['datetime', 'count']].to_csv('submit.csv', index = False)
             
 if __name__ == "__main__":
     my_trainer = Trainer()
