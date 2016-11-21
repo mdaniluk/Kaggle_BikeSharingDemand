@@ -35,7 +35,7 @@ class Loader:
         data_train_valid = self.read_data(path_train)
         data_train_valid = self.logarithmic_transformation(data_train_valid)
         data_test = self.read_data(path_test)
-        data_train, data_valid = self.train_valid_split(data_train_valid, split_day = 17)
+        data_train, data_valid = self.train_valid_split(data_train_valid, split_day = 15)
         return data_train, data_valid, data_test
     
     def create_data(self, data, input_cols):

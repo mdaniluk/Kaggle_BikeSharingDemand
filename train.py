@@ -74,9 +74,9 @@ class Trainer:
         
         model_casual = self.gradient_boosting_train(X_train, y_train_casual)
         y_predict_casual = np.exp(self.model_predict(model_casual, X_valid)) - 1
-        
+#        
         y_predict_count = np.round(y_predict_registered + y_predict_casual)
-        
+#        
         rmsle = self.get_rmsle(y_predict_count, np.exp(y_valid_registered) + np.exp(y_valid_casual) - 2)
         print(rmsle)
         self.predict('data/test.csv', model_registered, model_casual)
@@ -92,12 +92,7 @@ class Trainer:
         test_data['count'] = y_predict_count
         output = test_data[['datetime', 'count']].copy()
         output.to_csv('submit.csv', index = False)
-        print ('A')
-        
-        
-        
-        
-    
+            
 if __name__ == "__main__":
     my_trainer = Trainer()
     my_trainer.set_input_cols()
