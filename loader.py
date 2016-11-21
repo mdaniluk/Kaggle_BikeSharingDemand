@@ -6,7 +6,6 @@ class Loader:
     
     def parse_data_time(self, data):
         date_time = pd.DatetimeIndex(data['datetime'])
-        data.set_index(date_time, inplace = True)
         data['date'] = date_time.date
         data['day'] = date_time.day
         data['month'] = date_time.month
@@ -44,8 +43,7 @@ class Loader:
         y_registered = data['registered'].as_matrix()
         y_casual = data['casual'].as_matrix()
         return X, y, y_registered, y_casual
-        
-    
+
 if __name__ == "__main__":
     my_loader = Loader()
     my_loader.load_data('data/train.csv', 'data/test.csv')

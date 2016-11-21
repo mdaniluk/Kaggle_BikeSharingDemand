@@ -5,8 +5,8 @@ from sklearn.grid_search import GridSearchCV
 import numpy as np
 
 class Trainer:
-    def get_rmsle(self, y_pred, y_actual):
-        diff = np.log(y_pred + 1) - np.log(y_actual + 1)
+    def get_rmsle(self, y_predicted, y_true):
+        diff = np.log(y_predicted + 1) - np.log(y_true + 1)
         mean_error = np.square(diff).mean()
         return np.sqrt(mean_error)
         
@@ -63,9 +63,9 @@ class Trainer:
         y_predict = model.predict(X)
         return y_predict
         
-    def train(self):
+    def train(self, path_train, path_test):
         my_loader = Loader()
-        train, valid, _ = my_loader.load_data('data/train.csv', 'data/test.csv')
+        train, valid, _ = my_loader.load_data(path_train, path_test)
         X_train, y_train, y_train_registered, y_train_casual = my_loader.create_data(train, self.input_cols)
         X_valid, y_valid, y_valid_registered, y_valid_casual = my_loader.create_data(valid, self.input_cols)
                
@@ -74,12 +74,12 @@ class Trainer:
         
         model_casual = self.gradient_boosting_train(X_train, y_train_casual)
         y_predict_casual = np.exp(self.model_predict(model_casual, X_valid)) - 1
-#        
+        
         y_predict_count = np.round(y_predict_registered + y_predict_casual)
-#        
+       
         rmsle = self.get_rmsle(y_predict_count, np.exp(y_valid_registered) + np.exp(y_valid_casual) - 2)
         print(rmsle)
-        self.predict('data/test.csv', model_registered, model_casual)
+        self.predict(path_test, model_registered, model_casual)
         
     def predict(self, path, model_registerd, model_casual):
         my_loader = Loader()
@@ -96,5 +96,5 @@ class Trainer:
 if __name__ == "__main__":
     my_trainer = Trainer()
     my_trainer.set_input_cols()
-    my_trainer.train()
+    my_trainer.train('data/train.csv', 'data/test.csv')
 #    my_trainer.grid_search()
